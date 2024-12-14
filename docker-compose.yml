@@ -1,0 +1,74 @@
+services:
+  postgresql:
+    container_name: mc_pg_sql
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ousmane
+      POSTGRES_PASSWORD: ousmane
+      POSTGRES_DB: keycloak
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices-net
+    restart: unless-stopped
+  pgadmin:
+    container_name: mc_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - microservices-net
+    restart: unless-stopped
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    restart: always
+    networks:
+      - microservices-net
+
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+
+    links:
+      - postgresql
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin@1234
+      KC_DB: postgres
+      KC_DB_SCHEMA: public
+      KC_DB_USERNAME: ousmane
+      KC_DB_PASSWORD: ousmane
+      KC_DB_URL: jdbc:postgresql://mc_pg_sql:5432/keycloak
+      KC_HOSTNAME: localhost
+      KC_FEATURES: token-exchange,admin-fine-grained-authz
+      KEYCLOAK_SMTP_SERVER_HOST: mailhog
+      KEYCLOAK_SMTP_SERVER_PORT: 1025
+      KEYCLOAK_SMTP_SERVER_FROM: example@example.com
+      KEYCLOAK_SMTP_SERVER_FROM_DISPLAY: "Keycloak"
+    depends_on:
+      - postgresql
+    command:
+      - start-dev
+    restart: always
+    ports:
+      - "9099:8080"
+    networks:
+      - microservices-net
+networks:
+  microservices-net:
+    driver: bridge
+volumes:
+  postgres:
+  pgadmin:

@@ -1,0 +1,48 @@
+## Contexte Initial
+
+- Besoin de renouveler ou de se débarrasser d'objets personnels
+- Volonté de créer une solution locale d'échange et de revente
+
+## Problèmes Adressés
+
+- Difficultés de revente d'objets personnels
+- Coût élevé du renouvellement de mobilier/vêtements
+- Manque de plateformes locales adaptées
+- Nécessité de solutions économiques et écologiques
+
+## Innovations et Différenciateurs
+
+### Aspects Uniques
+
+- Approche locale
+- Accent sur l'économie circulaire
+- Flexibilité des transactions
+- Communauté collaborative
+
+### Avantages Concurrentiels
+
+- Proximité géographique
+- Simplicité d'utilisation
+- Personnalisation
+- Sécurité des échanges
+# Objectifs du projet
+
+### Objectifs Principaux
+
+- Créer une plateforme communautaire d'échange et de revente
+- Faciliter les transactions entre particuliers
+- Promouvoir l'économie circulaire
+- Réduire le gaspillage
+- Offrir une alternative économique aux achats neufs
+
+### Objectifs Secondaires
+
+- Développer une solution technologique innovante
+- Acquérir une expérience en développement de microservices
+- Répondre à un besoin local du marché marocain
+
+### Caractéristiques Démographiques
+
+- Tranche d'âge principale : 18-35 ans
+- Localisation : Principalement urbaine (Casablanca, Rabat, Marrakech)
+- Niveau technologique : Familier avec les applications web et mobile

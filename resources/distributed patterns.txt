@@ -1,0 +1,35 @@
+
+- Service Registry and Discovery (/)
+- API Gateway (/)
+- Database per Service (/)
+- Circuit breaker (x)
+
+
+------------------------------------------
+
+First part:
+- Spring boot in depth
+
+## 1. Service Utilisateurs (User Service)
+
+- Gestion des comptes utilisateurs
+- Authentification et autorisation
+- Création et mise à jour de profils
+- Système de notation et de réputation
+- Stockage des informations personnelles
+
+## 2. Service Annonces (Listing Service)
+
+- Création, modification et suppression d'annonces
+- Gestion des catégories
+- Stockage des détails des produits
+- Gestion des images
+- Validation des annonces
+
+## 3 Service de Transaction (Transaction Service)
+
+- Gestion des processus de vente/échange
+- Suivi des transactions
+- Intégration des moyens de paiement
+- Historique des transactions
+
