@@ -1,9 +1,11 @@
 package org.etutoria.listingservice.repositories;
 
 import org.etutoria.listingservice.entities.ListingImage;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
 
+public interface ListingImageRepository extends MongoRepository<ListingImage, String> {
 
-public interface ListingImageRepository extends JpaRepository<ListingImage, Long> {
+    List<ListingImage> findByListing_ListingId(String listingId);
 }

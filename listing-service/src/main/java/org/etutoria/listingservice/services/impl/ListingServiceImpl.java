@@ -7,6 +7,7 @@ import org.etutoria.listingservice.entities.Category;
 import org.etutoria.listingservice.entities.Listing;
 import org.etutoria.listingservice.entities.ListingImage;
 import org.etutoria.listingservice.repositories.CategoryRepository;
+import org.etutoria.listingservice.repositories.ListingImageRepository;
 import org.etutoria.listingservice.repositories.ListingRepository;
 import org.etutoria.listingservice.restemplate.InternalUser;
 import org.etutoria.listingservice.restemplate.UserService;
@@ -23,10 +24,13 @@ public class ListingServiceImpl implements ListingService {
     private final CategoryRepository categoryRepository;
     private final UserService userService;
 
-    public ListingServiceImpl(ListingRepository listingRepository, CategoryRepository categoryRepository, UserService userService) {
+    private final ListingImageRepository listingImageRepository;
+
+    public ListingServiceImpl(ListingRepository listingRepository, CategoryRepository categoryRepository, UserService userService, ListingImageRepository listingImageRepository) {
         this.listingRepository = listingRepository;
         this.categoryRepository = categoryRepository;
         this.userService = userService;
+        this.listingImageRepository = listingImageRepository;
     }
 
 //    @Override
@@ -95,8 +99,21 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public List<Listing> getAllListings() {
-        return listingRepository.findAll();
+    public List<Listing> getAllListings(HttpServletRequest request) {
+        List<Listing> listings = listingRepository.findAll();
+        String token = (String) request.getAttribute("token");
+        if (token == null) {
+            throw new IllegalArgumentException("Token cannot be null");
+        }
+
+        for (Listing listing : listings) {
+            List<ListingImage> images = listingImageRepository.findByListing_ListingId(listing.getListingId());
+            listing.setImages(images);
+
+            InternalUser internalUser = userService.getInternalUser(listing.getUserId(), token);
+            listing.setInternalUser(internalUser);
+        }
+        return listings;
     }
 
 }

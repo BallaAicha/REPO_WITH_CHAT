@@ -1,5 +1,4 @@
 package org.etutoria.usersservice.Config;
-
 import org.etutoria.usersservice.repositories.InternalUserRepository;
 import org.keycloak.events.Event;
 import org.keycloak.events.EventListenerProvider;

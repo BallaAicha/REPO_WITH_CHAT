@@ -14,7 +14,8 @@ public class SecurityConfig {
                     HttpMethod.POST,
                     "/public/**",
                     "/users",
-                    "/users/login"
+                    "/users/login",
+                    "/users/refreshToken"
             );
             web.ignoring().requestMatchers(
                     HttpMethod.GET,

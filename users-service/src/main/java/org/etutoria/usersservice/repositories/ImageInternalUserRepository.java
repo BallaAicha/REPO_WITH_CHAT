@@ -1,8 +1,10 @@
 package org.etutoria.usersservice.repositories;
 
-
 import org.etutoria.usersservice.entities.ImageInternalUser;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface ImageInternalUserRepository extends JpaRepository<ImageInternalUser, Long> {
+import java.util.List;
+
+public interface ImageInternalUserRepository extends MongoRepository<ImageInternalUser, String> {
+    List<ImageInternalUser> findByInternalUserId(String userId);
 }

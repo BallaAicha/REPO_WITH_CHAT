@@ -10,5 +10,6 @@ public interface ListingService {
     Listing getListingById(String listingId);
     Listing updateListing(String listingId, Listing listingDTO);
     void deleteListing(String listingId);
-    List<Listing> getAllListings();
+    //List<Listing> getAllListings();
+    List<Listing> getAllListings(HttpServletRequest request);
 }

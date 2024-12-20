@@ -1,10 +1,12 @@
 package org.etutoria.usersservice.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
+@Document
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -12,17 +14,13 @@ import lombok.*;
 @Data
 public class ImageInternalUser {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idImage;
+    private String idImage;
     private String name;
     private String type;
 
-    @Column(name = "IMAGE", length = 4048576)
-    @Lob
     private byte[] image;
 
-    @ManyToOne
-    @JoinColumn(name = "USER_ID")
+    @DBRef
     @JsonIgnore
     private InternalUser internalUser;
 }

@@ -33,21 +33,21 @@ public class ListingImageServiceImpl implements ListingImageService {
     }
 
     @Override
-    public ListingImage getImageDetails(Long id) throws IOException {
+    public ListingImage getImageDetails(String id) throws IOException {
         final Optional<ListingImage> dbImage = listingImageRepository.findById(id);
         return ListingImage.builder().idImage(dbImage.get().getIdImage()).name(dbImage.get().getName())
                 .type(dbImage.get().getType()).image(dbImage.get().getImage()).build();
     }
 
     @Override
-    public ResponseEntity<byte[]> getImage(Long id) throws IOException {
+    public ResponseEntity<byte[]> getImage(String id) throws IOException {
         final Optional<ListingImage> dbImage = listingImageRepository.findById(id);
         return ResponseEntity.ok().contentType(MediaType.valueOf(dbImage.get().getType()))
                 .body(dbImage.get().getImage());
     }
 
     @Override
-    public void deleteImage(Long id) {
+    public void deleteImage(String id) {
         listingImageRepository.deleteById(id);
 
 
@@ -55,6 +55,7 @@ public class ListingImageServiceImpl implements ListingImageService {
 
     @Override
     public ListingImage uplaodImageListing(MultipartFile file, String listingId) throws IOException {
+
         Listing listing = listingRepository.findById(listingId).
                 orElseThrow(() -> new IllegalArgumentException("Listing not found"));
         return listingImageRepository.save(ListingImage.builder().name(file.getOriginalFilename()).type(file.getContentType())

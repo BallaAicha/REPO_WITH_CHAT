@@ -1,12 +1,14 @@
 package org.etutoria.usersservice.repositories;
 
-
-
 import org.etutoria.usersservice.entities.InternalUser;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.etutoria.usersservice.entities.Status;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
 import java.util.Optional;
 
-public interface InternalUserRepository extends JpaRepository<InternalUser, String> {
+public interface InternalUserRepository extends MongoRepository<InternalUser, String> {
     Optional<InternalUser> findByEmail(String email);
+
+    List<InternalUser> findAllByStatus(Status status);
 }

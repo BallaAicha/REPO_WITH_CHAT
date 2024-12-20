@@ -33,20 +33,20 @@ public class ListingImageController {
     }
 
     @RequestMapping(value = "/get/info/{id}" , method = RequestMethod.GET)
-    public ListingImage getImageDetails(@PathVariable("id") Long id) throws IOException {
+    public ListingImage getImageDetails(@PathVariable("id") String id) throws IOException {
         return listingImageService.getImageDetails(id);
     }
 
 
     @RequestMapping(value = "/load/{id}" , method = RequestMethod.GET)
-    public ResponseEntity<byte[]> getImage(@PathVariable("id") Long id) throws IOException
+    public ResponseEntity<byte[]> getImage(@PathVariable("id") String id) throws IOException
     {
         return listingImageService.getImage(id);
     }
 
 
     @RequestMapping(value = "/delete/{id}" , method = RequestMethod.DELETE)
-    public void deleteImage(@PathVariable("id") Long id){
+    public void deleteImage(@PathVariable("id") String id){
         listingImageService.deleteImage(id);
     }
 

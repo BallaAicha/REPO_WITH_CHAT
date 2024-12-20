@@ -1,11 +1,13 @@
 package org.etutoria.usersservice.entities;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Entity
+@Document
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,8 +23,8 @@ public class InternalUser {
     private String phoneNumber;
     private String profilePicture;
     private Double rating = 0.0;
-
-    @OneToMany(mappedBy = "internalUser")
+    private Status status;
+    @DBRef
     private List<ImageInternalUser> images;
     private String imagePath;
 }

@@ -17,7 +17,10 @@ public interface UserService {
     UserResource getUser(String userId);
     List<RoleRepresentation> getUserRoles(String userId);
     List<GroupRepresentation> getUserGroups(String userId);
-
     List<InternalUser> getAllInternalUsers();
     InternalUser getInternalUser(String userId);
+    void deleteInternalUser(String userId);
+    void disconnectUser(InternalUser internalUser);
+    List<InternalUser> findConnectedUsers();
+    String refreshToken(String refreshToken);
 }

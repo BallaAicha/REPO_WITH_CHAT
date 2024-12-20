@@ -9,11 +9,13 @@ import java.util.List;
 
 public interface ProfileImageService {
     ImageInternalUser uplaodImage(MultipartFile file) throws IOException;
-    ImageInternalUser getImageDetails(Long id) throws IOException;
-    ResponseEntity<byte[]> getImage(Long id) throws IOException;
-    void deleteImage(Long id) ;
+    ImageInternalUser getImageDetails(String id) throws IOException;
+    ResponseEntity<byte[]> getImage(String id) throws IOException;
+    void deleteImage(String id) ;
     ImageInternalUser uplaodImageProfileByUserId(MultipartFile file,String id) throws IOException;
     List<ImageInternalUser> getImagesParUser(String userId);
+    //supprime un internal user
+
 
 
 }

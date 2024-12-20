@@ -74,9 +74,14 @@ public class ListingController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping
-    public ResponseEntity<List<Listing>> getAllListings() {
-        List<Listing> listings = listingService.getAllListings();
-        return ResponseEntity.ok(listings);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<Listing>> getAllListings() {
+//        List<Listing> listings = listingService.getAllListings();
+//        return ResponseEntity.ok(listings);
+//    }
+@GetMapping
+public ResponseEntity<List<Listing>> getAllListings(HttpServletRequest request) {
+    List<Listing> listings = listingService.getAllListings(request);
+    return ResponseEntity.ok(listings);
+}
 }

@@ -1,9 +1,7 @@
 package org.etutoria.listingservice.repositories;
 
 import org.etutoria.listingservice.entities.Listing;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
-
-
-public interface ListingRepository extends JpaRepository<Listing, String> {
+public interface ListingRepository extends MongoRepository<Listing, String> {
 }

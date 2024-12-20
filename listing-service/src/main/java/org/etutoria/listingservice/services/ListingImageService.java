@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface ListingImageService {
     ListingImage uplaodImage(MultipartFile file) throws IOException;
-    ListingImage getImageDetails(Long id) throws IOException;
-    ResponseEntity<byte[]> getImage(Long id) throws IOException;
-    void deleteImage(Long id) ;
+    ListingImage getImageDetails(String id) throws IOException;
+    ResponseEntity<byte[]> getImage(String id) throws IOException;
+    void deleteImage(String id) ;
     ListingImage uplaodImageListing(MultipartFile file,String listingId) throws IOException;
     List<ListingImage> getImagesParListing(String listingId);
 }
