@@ -1,4 +1,6 @@
+// WebSocketConfig.java
 package org.etutoria.usersservice.Config;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.converter.DefaultContentTypeResolver;
@@ -8,12 +10,20 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.List;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-@Configuration //@Configuration : Indique que cette classe contient des configurations Spring.
-@EnableWebSocketMessageBroker//Active le support de WebSocket et STOMP (Simple Text Oriented Messaging Protocol) pour la messagerie.
+@Configuration
+@EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    @Autowired
+    private JwtDecoder jwtDecoder;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/user");
@@ -23,7 +33,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setAllowedOrigins("*").withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("*")
+                .addInterceptors(new JwtHandshakeInterceptor(jwtDecoder))
+                .withSockJS();
     }
 
     @Override
@@ -36,5 +49,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         messageConverters.add(converter);
         return false;
     }
-
 }

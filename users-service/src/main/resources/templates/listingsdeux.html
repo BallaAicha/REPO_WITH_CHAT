@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Listings</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>Listings</h1>
+
+<!-- Conteneur pour les listings -->
+<div id="listings"></div>
+
+<script>
+    // Jeton JWT pour autorisation
+    const token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXZEEtY2IxcFhwSkdTZFo2ck5CNWJla1ljWm9YbG1OYXZKRlI0TWtHNk04In0.eyJleHAiOjE3MzUwNDgxNjEsImlhdCI6MTczNTAzMDE2MSwianRpIjoiN2Q1ODUxMjgtOWYyYi00Yjc1LWFjZmItOGRlY2Q3M2Q4MDFlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDk5L3JlYWxtcy9jb25uZWN0VHJvYyIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJjNDc5MzExNS0yOWNjLTRjMjctOTQ3Zi1jMTBmYTQ2ZDhhOTAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJjb25uZWN0Iiwic2lkIjoiNzVkMWUxOTktMzI0My00Mjc3LWIxYmEtZTA2Zjc3MzIxZjdmIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtY29ubmVjdHRyb2MiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX0sImNvbm5lY3QiOnsicm9sZXMiOlsiVVNFUiJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInBob25lTnVtYmVyIjoiMTIzNDU2Nzg5MCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibnVtYmVyT2ZWaWV3cyI6MCwibmFtZSI6ImRhdmlkIGRhdmlkIiwicmF0aW5nIjoiMC4wIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGF2aWRAdGVzdC5jb20iLCJnaXZlbl9uYW1lIjoiZGF2aWQiLCJmYW1pbHlfbmFtZSI6ImRhdmlkIiwiZW1haWwiOiJkYXZpZEB0ZXN0LmNvbSJ9.oVkQ0-5MR0xvNrxY-l9OI0B0cEkyYfCEJNyX2XqGtabWERdENfjqxxD66_r-FL1T40Iyz0bMPZEB_KBrszUbBCpGEA1Zcj2nlcsTWO9dsY_d4y_BcPxrJACgwKZk8Ii4yLGCvBOK-ACyXNvI1bA3kqEQQEl-m1j5-nSCuzWG2-N1so_P2hvqBU2yKO6VLkiuiaZmmmMXu_KmqvJnkz-aUq1RTRh60FnJVu27lzaTPWcNd4vWUwo_yy9ph66U5Dp-sGzqVfZRrZMQnkge4Dm9KBFjL8M4hASHD8rsx8bXUgt5AYBvBvaUU_bXxAHDfEDZ35cH2qE0kCAa1fADsggB_g";
+
+    // URL relative pour le WebSocket (correction)
+    const stompClientUrl = '/auth/ws';
+    const apiUrl = 'http://localhost:6801/api/listings'; // URL API pour récupérer les listings
+
+    let stompClient = null;
+
+    async function getListings() {
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur : ' + response.status);
+            }
+
+            const data = await response.json();
+            displayListings(data);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des listings :', error);
+            alert('Impossible de charger les listings. Veuillez réessayer.');
+        }
+    }
+
+    function displayListings(listings) {
+        const listingsContainer = document.getElementById('listings');
+        listingsContainer.innerHTML = ''; // Réinitialiser le conteneur
+
+        // Afficher chaque listing dans le conteneur
+        listings.forEach(listing => {
+            const listingDiv = document.createElement('div');
+            listingDiv.innerHTML = `
+                <h2>${listing.title}</h2>
+                <p>${listing.description}</p>
+                <button onclick="contactSeller('${listing.userId}')">Contacter le vendeur</button>
+            `;
+            listingsContainer.appendChild(listingDiv);
+        });
+    }
+
+    function contactSeller(userId) {
+        console.log('Contacting seller with ID:', userId);
+
+        // Connexion avec SockJS et STOMP
+        const socket = new SockJS(stompClientUrl);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+            { Authorization: 'Bearer ' + token }, // Transmettre le token ici pour la connexion
+            () => {
+                console.log('STOMP connection established');
+
+                // Abonnement au topic
+                stompClient.subscribe(`/topic/messages/${userId}`, message => {
+                    console.log('Message reçu :', JSON.parse(message.body));
+                });
+
+                // Envoi d'un message (inclure le token dans les en-têtes)
+                const chatMessage = {
+                    content: `Bonjour, je suis intéressé par votre annonce.`,
+                    recipientId: userId,
+                    listingId: '16c6faa0-8adb-4c2c-abe1-15a869407d9f',
+                };
+
+                stompClient.send(`/app/chat/${userId}`, { Authorization: 'Bearer ' + token }, JSON.stringify(chatMessage));
+            },
+            error => {
+                console.error('Erreur lors de la connexion STOMP :', error);
+            }
+        );
+    }
+
+    // Récupérer les listings au chargement
+    getListings();
+</script>
+
+</body>
+</html>
