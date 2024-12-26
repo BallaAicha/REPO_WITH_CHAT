@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Listings</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<h1>Listings</h1>
+
+<!-- Conteneur pour les listings -->
+<div id="listings"></div>
+
+<!-- Conteneur pour afficher les messages reçus -->
+<div id="received-messages">
+    <h2>Messages reçus :</h2>
+    <ul id="messages-list"></ul>
+</div>
+
+<script>
+    // Jeton JWT pour autorisation
+    const token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXZEEtY2IxcFhwSkdTZFo2ck5CNWJla1ljWm9YbG1OYXZKRlI0TWtHNk04In0.eyJleHAiOjE3MzUxMzc3NDksImlhdCI6MTczNTExOTc0OSwianRpIjoiNGI0NzVlNDgtNzE0MS00OTFmLWI1NmYtNjc4NDAxMTQ5NDUwIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDk5L3JlYWxtcy9jb25uZWN0VHJvYyIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiI1Y2EyNWQyNi1iNjFjLTRlZTQtYTNlYi0zMDA5NWMwMDA2ZjciLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJjb25uZWN0Iiwic2lkIjoiNDgyMjk0MGQtOTZlYy00M2UzLTlkM2ItNTBhM2Y5NWVjZTI2IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtY29ubmVjdHRyb2MiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX0sImNvbm5lY3QiOnsicm9sZXMiOlsiVVNFUiJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInBob25lTnVtYmVyIjoiMTIzNDU2Nzg5MCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibnVtYmVyT2ZWaWV3cyI6MCwibmFtZSI6IkRhdmlkIERhdmlkIiwicmF0aW5nIjoiMC4wIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGF2aWRAdGVzdC5jb20iLCJnaXZlbl9uYW1lIjoiRGF2aWQiLCJmYW1pbHlfbmFtZSI6IkRhdmlkIiwiZW1haWwiOiJkYXZpZEB0ZXN0LmNvbSJ9.ywhQ0_3awuGBtCYKsQXS1qtzxccEm6RfsZ1VMlZFe9buN0sw6U_S6ZVqjEwIQwnJCHQpaI0E1HnvQc-uQGxyEF7zRF_ZWkJZXV_QItuCgP8mkcBtIanbXPRA5n72HghEN-bpX0YanE0A1XB2L04W0A_5Th3jewtuKMO7dyfu1odRyB3acRJRwwVUZLuvhVpGRv_LZgSRIebgW_n6kiavKKZxcVrM11fYlIqgeICtEfiklnQhA9Af5_HtWZQp8sThw0H0ouwSN5UiF9RkpPmpckNWKYjndipkAhGf23A5ypDONNyGwPksnAa_8WmxX3cV52dKHVgr3hxwtNos8jfw8g";
+
+    // URL relative pour le WebSocket
+    const stompClientUrl = '/auth/ws';
+    const apiUrl = 'http://localhost:6801/api/listings'; // URL API pour récupérer les listings
+
+    let stompClient = null;
+
+    async function getListings() {
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur : ' + response.status);
+            }
+
+            const data = await response.json();
+            displayListings(data);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des listings :', error);
+            alert('Impossible de charger les listings. Veuillez réessayer.');
+        }
+    }
+
+    function displayListings(listings) {
+        const listingsContainer = document.getElementById('listings');
+        listingsContainer.innerHTML = '';
+
+        listings.forEach(listing => {
+            const listingDiv = document.createElement('div');
+            listingDiv.innerHTML = `
+                <h2>${listing.title}</h2>
+                <p>${listing.description}</p>
+                <button onclick="contactSeller('${listing.userId}')">Contacter le vendeur</button>
+            `;
+            listingsContainer.appendChild(listingDiv);
+        });
+    }
+
+    function contactSeller(userId) {
+        console.log('Contacting seller with ID:', userId);
+
+        const socket = new SockJS(stompClientUrl);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+            { Authorization: 'Bearer ' + token },
+            () => {
+                console.log('STOMP connection established');
+
+                // Subscribe to receive responses
+                stompClient.subscribe(`/topic/messages/${userId}`, (message) => {
+                    const receivedMessage = JSON.parse(message.body);
+                    displayReceivedMessage(receivedMessage, userId);
+                });
+
+                // Send a default greeting message
+                const chatMessage = {
+                    content: `Bonjour, je suis intéressé par votre annonce.`,
+                    recipientId: userId,
+                };
+
+                stompClient.send(`/app/chat/${userId}`, { Authorization: 'Bearer ' + token }, JSON.stringify(chatMessage));
+            },
+            (error) => {
+                console.error('Erreur lors de la connexion STOMP :', error);
+            }
+        );
+    }
+
+    function displayReceivedMessage(message, userId) {
+        const messagesList = document.getElementById('messages-list');
+        const messageItem = document.createElement('li');
+
+        // Ajouter le contenu du message et un champ pour répondre
+        messageItem.innerHTML = `
+            <strong>De :</strong> ${message.senderName} <br>
+            <strong>Message :</strong> ${message.content} <br>
+            <em>Reçu à : ${new Date(parseInt(message.tstamp || Date.now())).toLocaleString()}</em>
+            <br>
+            <textarea id="reply-${userId}" placeholder="Répondre..."></textarea>
+            <button onclick="sendReply('${userId}', document.getElementById('reply-${userId}').value)">Envoyer</button>
+        `;
+
+        messagesList.appendChild(messageItem);
+    }
+
+    function sendReply(userId, content) {
+        if (!content.trim()) {
+            alert('Le message ne peut pas être vide.');
+            return;
+        }
+
+        const replyMessage = {
+            content,
+            recipientId: userId,
+        };
+
+        stompClient.send(`/app/chat/${userId}`, { Authorization: 'Bearer ' + token }, JSON.stringify(replyMessage));
+        alert('Message envoyé avec succès.');
+    }
+
+    // Charger les annonces au démarrage
+    getListings();
+</script>
+
+</body>
+</html>

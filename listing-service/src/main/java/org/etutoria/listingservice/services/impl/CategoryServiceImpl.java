@@ -24,10 +24,9 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryDTO.getId() == null || categoryDTO.getId().isEmpty()) {
             categoryDTO.setId(java.util.UUID.randomUUID().toString());
         }
-        if (categoryDTO.getParentCategory() != null && categoryDTO.getParentCategory().getId() != null) {
-            ParentCategory parentCategory = parentCategoryRepository.findById(categoryDTO.getParentCategory().getId())
+        if (categoryDTO.getParentCategoryId() != null && !categoryDTO.getParentCategoryId().isEmpty()) {
+            categoryRepository.findById(categoryDTO.getParentCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("ParentCategory not found"));
-            categoryDTO.setParentCategory(parentCategory);
         }
         return categoryRepository.save(categoryDTO);
     }
@@ -39,14 +38,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category updateCategory(String id, Category categoryDTO) {
-        if (categoryDTO.getParentCategory() != null && categoryDTO.getParentCategory().getId() != null) {
-            ParentCategory parentCategory = parentCategoryRepository.findById(categoryDTO.getParentCategory().getId())
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found"));
+        category.setName(categoryDTO.getName());
+        category.setDescription(categoryDTO.getDescription());
+        if (categoryDTO.getParentCategoryId() != null && !categoryDTO.getParentCategoryId().isEmpty()) {
+            ParentCategory parentCategory = parentCategoryRepository.findById(categoryDTO.getParentCategoryId())
                     .orElseThrow(() -> new IllegalArgumentException("ParentCategory not found"));
-            categoryDTO.setParentCategory(parentCategory);
+            category.setParentCategoryId(parentCategory.getId());
         }
-        return categoryRepository.save(categoryDTO);
+        return categoryRepository.save(category);
     }
-
     @Override
     public void deleteCategory(String id) {
         categoryRepository.deleteById(id);

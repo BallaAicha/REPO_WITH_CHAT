@@ -1,40 +1,50 @@
 package org.etutoria.usersservice.ChatMessage;
-
-import lombok.RequiredArgsConstructor;
-import org.etutoria.usersservice.chatRoom.ChatRoomService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ChatMessageService {
-    private final ChatMessageRepository chatMessageRepository;
-    private final ChatRoomService chatRoomService;
-
-    public ChatMessage save(ChatMessage chatMessage, String listingId) {
-        var chatId = chatRoomService.getChatRoomId(
-                chatMessage.getSenderId(),
-                chatMessage.getReceiverId(),
-                listingId,
-                true
-        ).orElseThrow();
-        chatMessage.setChatId(chatId);
-        return chatMessageRepository.save(chatMessage);
+    private static final Logger logger = LoggerFactory.getLogger(ChatMessageService.class);
+    private final ChatMessageRepository repository;
+    private final SimpMessagingTemplate messagingTemplate;
+    public ChatMessageService(ChatMessageRepository repository, SimpMessagingTemplate messagingTemplate) {
+        this.repository = repository;
+        this.messagingTemplate = messagingTemplate;
+    }
+    @Transactional
+    public void sendMessage(String to, ChatMessage chatMessage, Jwt jwt) {
+        String senderId = jwt.getSubject();
+        String firstName = jwt.getClaimAsString("given_name");
+        String lastName = jwt.getClaimAsString("family_name");
+        chatMessage.setSenderId(senderId);
+        chatMessage.setSenderName(firstName + " " + lastName);
+        chatMessage.setRecipientId(to);
+        chatMessage.setChatChannel(createAndOrGetChatChannel(senderId, to));
+        chatMessage.setTstamp(generateTimeStamp());
+        repository.save(chatMessage);
+        messagingTemplate.convertAndSend("/topic/messages/" + chatMessage.getChatChannel(), chatMessage);
+        messagingTemplate.convertAndSend("/topic/messages/" + senderId, chatMessage);
+        messagingTemplate.convertAndSend("/topic/messages/" + to, chatMessage);
+    }
+    private String generateTimeStamp() {
+        return String.valueOf(System.currentTimeMillis());
+    }
+    private String createAndOrGetChatChannel(String senderId, String to) {
+        return senderId.compareTo(to) < 0 ? senderId + "-" + to : to + "-" + senderId;
     }
 
-    public List<ChatMessage> getChatMessages(String senderId, String receiverId) {
-        var chatId = chatRoomService.getChatRoomId(senderId, receiverId, null, false);
-        return chatId.map(chatMessageRepository::findByChatId)
-                .orElse(new ArrayList<>());
+
+    @Transactional(readOnly = true)
+    public List<ChatMessage> getMessagesByChannel(String chatChannel) {
+        logger.info("Fetching messages for channel: {}", chatChannel);
+        List<ChatMessage> messages = repository.findByChatChannel(chatChannel);
+        logger.info("Found {} messages for channel: {}", messages.size(), chatChannel);
+        return messages;
     }
-
-
-
-    public List<ChatMessage> getMessagesBetweenUsers(String userId1, String userId2) {
-        return chatMessageRepository.findAllBySenderIdOrReceiverId(userId1, userId2);
-    }
-
-
 }

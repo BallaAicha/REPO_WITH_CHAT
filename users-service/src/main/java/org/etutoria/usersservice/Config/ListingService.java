@@ -1,4 +1,4 @@
-package org.etutoria.usersservice.listing;
+package org.etutoria.usersservice.Config;
 
 import lombok.RequiredArgsConstructor;
 import org.etutoria.usersservice.entities.Listing;

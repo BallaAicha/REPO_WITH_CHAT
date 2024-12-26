@@ -1,14 +1,14 @@
 package org.etutoria.usersservice.Apis;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 public class LoginResponse {
-    private String access_token;
+    @JsonProperty("access_token")
+    private String accessToken;
 
-    // Getters and setters
     public String getAccessToken() {
-        return access_token;
+        return accessToken;
     }
 
-    public void setAccessToken(String access_token) {
-        this.access_token = access_token;
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
     }
 }

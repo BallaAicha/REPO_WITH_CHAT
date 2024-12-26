@@ -19,12 +19,17 @@ public class ListingImageController {
 
     }
 
-    @PostMapping(value = "/uplaodImageListing/{listingId}" )
-    public ListingImage uploadMultiImages(@RequestParam("image") MultipartFile file,
-                                   @PathVariable("listingId") String listingId)
-            throws IOException {
-        return listingImageService.uplaodImageListing(file, listingId);
-    }
+//    @PostMapping(value = "/uplaodImageListing/{listingId}" )
+//    public ListingImage uploadMultiImages(@RequestParam("image") MultipartFile file,
+//                                   @PathVariable("listingId") String listingId)
+//            throws IOException {
+//        return listingImageService.uplaodImageListing(file, listingId);
+//    }
+@PostMapping(value = "/uploadImageListing/{listingId}")
+public List<ListingImage> uploadMultiImages(@RequestParam("images") List<MultipartFile> files,
+                                            @PathVariable("listingId") String listingId) throws IOException {
+    return listingImageService.uploadImageListing(files, listingId);
+}
 
     @RequestMapping(value = "/getImagesListing/{listingId}" , method = RequestMethod.GET)
     public List<ListingImage> getImagesParListing(@PathVariable("listingId") String listingId)

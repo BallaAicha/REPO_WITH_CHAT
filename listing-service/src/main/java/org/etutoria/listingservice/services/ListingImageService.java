@@ -12,6 +12,7 @@ public interface ListingImageService {
     ListingImage getImageDetails(String id) throws IOException;
     ResponseEntity<byte[]> getImage(String id) throws IOException;
     void deleteImage(String id) ;
-    ListingImage uplaodImageListing(MultipartFile file,String listingId) throws IOException;
+    //ListingImage uplaodImageListing(MultipartFile file,String listingId) throws IOException;
     List<ListingImage> getImagesParListing(String listingId);
+    List<ListingImage> uploadImageListing(List<MultipartFile> files, String listingId) throws IOException;
 }

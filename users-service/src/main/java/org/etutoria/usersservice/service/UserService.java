@@ -5,9 +5,7 @@ import org.etutoria.usersservice.model.NewUser;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
-
 import java.util.List;
-
 public interface UserService {
     void createUser(NewUser newUser);
     void sendVerificationEmail(String userId);

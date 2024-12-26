@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.annotation.Transient;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Document
@@ -25,6 +26,7 @@ public class Listing extends BaseEntity {
     private BigDecimal price;
     private String location;
     private ListingStatus status;
+    private ListingState state;
     @DBRef(lazy = true)
     private Category category;
     @DBRef(lazy = true)
@@ -32,4 +34,9 @@ public class Listing extends BaseEntity {
     private String imagePath;
     @Transient
     private InternalUser internalUser;
+    private boolean isExchangeable;
+    private String paymentProofImage;
+    private boolean paymentVerified;
+    private boolean isPaymentPending; // Paiement nécessaire ou non
+    private LocalDateTime paymentDeadline; // Date limite de
 }

@@ -15,10 +15,12 @@ public class ChatMessage {
     private String id;
     private String chatId;
     private String senderId;
-    private String receiverId;
-    private String message;
-    private Date timestamp;
     private String SenderName;
     private String listingId;
     private Listing listing;
+    private String recipientId;
+    private String content;
+    private String chatChannel;
+    private String tstamp;
+
 }

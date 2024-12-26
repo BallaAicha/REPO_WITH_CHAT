@@ -24,7 +24,10 @@ public class InternalUser {
     private String profilePicture;
     private Double rating = 0.0;
     private Status status;
+    private Integer numberOfRatings = 0;
     @DBRef
     private List<ImageInternalUser> images;
     private String imagePath;
+    @DBRef
+    private Addresse address;
 }

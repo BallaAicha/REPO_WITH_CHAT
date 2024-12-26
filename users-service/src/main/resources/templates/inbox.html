@@ -1,10 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Inbox</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body>
-$END$
+<h1>Boîte de réception</h1>
+
+<!-- Conteneur pour les messages reçus -->
+<div id="messages">
+    <h2>Messages reçus :</h2>
+    <ul id="message-list"></ul>
+</div>
+
+<!-- Formulaire pour envoyer une réponse -->
+<div id="reply-box" style="display: none;">
+    <h2>Répondre à : <span id="recipient-name"></span></h2>
+    <textarea id="reply-message" placeholder="Tapez votre message..."></textarea><br>
+    <button id="send-reply">Envoyer</button>
+</div>
+
+<script th:inline="javascript">
+    // Jeton JWT de l'utilisateur connecté
+    const token = /*[[${token}]]*/ ''; // Ajouter le jeton token
+    const recipientId = /*[[${recipientId}]]*/ ''; // ID de l'annonceur
+    const stompClientUrl = '/auth/ws'; // URL WebSocket
+
+    let stompClient = null;
+    let currentChatChannel = null;
+    let selectedRecipientId = null;
+    let selectedRecipientName = null;
+
+    function connectAsRecipient() {
+        console.log('Connexion WebSocket pour afficher les messages reçus.');
+
+        const socket = new SockJS(stompClientUrl);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect(
+            { Authorization: 'Bearer ' + token }, // Passer le token pour l'authentification
+            () => {
+                console.log('Connexion établie au serveur STOMP.');
+
+                // S'abonner au topic personnel pour recevoir les messages
+                stompClient.subscribe(`/topic/messages/${recipientId}`, message => {
+                    console.log('Message reçu :', JSON.parse(message.body));
+                    displayMessage(JSON.parse(message.body));
+                });
+            },
+            error => {
+                console.error('Erreur lors de la connexion STOMP :', error);
+            }
+        );
+    }
+
+    function displayMessage(message) {
+        const messageList = document.getElementById('message-list');
+        const messageItem = document.createElement('li');
+
+        messageItem.innerHTML = `
+            <strong>De :</strong> ${message.senderName} <br>
+            <strong>Message :</strong> ${message.content} <br>
+            <strong>À propos de :</strong> Listing ID ${message.listingId} <br>
+            <span><em>Reçu à : ${new Date(parseInt(message.tstamp)).toLocaleString()}</em></span><br>
+            <button onclick="selectRecipient('${message.senderId}', '${message.senderName}', '${message.chatChannel}')">Répondre</button>
+        `;
+
+        messageList.appendChild(messageItem);
+    }
+
+    function selectRecipient(recipientId, recipientName, chatChannel) {
+        selectedRecipientId = recipientId;
+        selectedRecipientName = recipientName;
+        currentChatChannel = chatChannel;
+
+        // Afficher la boîte de réponse avec les informations du destinataire
+        document.getElementById('recipient-name').textContent = recipientName;
+        document.getElementById('reply-box').style.display = 'block';
+    }
+
+    function sendReply() {
+        const replyMessage = document.getElementById('reply-message').value;
+
+        if (!replyMessage || !selectedRecipientId || !currentChatChannel) {
+            alert('Veuillez sélectionner un destinataire et entrer un message !');
+            return;
+        }
+
+        // Formater le message pour l'envoi
+        const chatMessage = {
+            content: replyMessage,
+            senderId: recipientId, // Annonceur comme émetteur
+            recipientId: selectedRecipientId,
+            senderName: "Annonceur", // Vous pouvez ajuster ce nom
+            chatChannel: currentChatChannel,
+            tstamp: new Date().getTime().toString(), // Timestamp actuel
+        };
+
+        stompClient.send(
+            `/app/chat/${selectedRecipientId}`,
+            { Authorization: 'Bearer ' + token },
+            JSON.stringify(chatMessage)
+        );
+
+        console.log('Message envoyé :', chatMessage);
+
+        // Réinitialiser la zone de saisie
+        document.getElementById('reply-message').value = '';
+        document.getElementById('reply-box').style.display = 'none';
+    }
+
+    // Relier le bouton d'envoi de réponse à la fonction sendReply
+    document.getElementById('send-reply').addEventListener('click', sendReply);
+
+    // Connecter au WebSocket dès que la page est chargée
+    connectAsRecipient();
+</script>
 </body>
 </html>

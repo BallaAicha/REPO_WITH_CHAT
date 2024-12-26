@@ -16,7 +16,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: "http://localhost:9099/realms/connectTroc"
-
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 server:
   port: 6801

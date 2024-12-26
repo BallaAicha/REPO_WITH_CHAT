@@ -11,11 +11,17 @@
 <!-- Conteneur pour les listings -->
 <div id="listings"></div>
 
+<!-- Conteneur pour afficher les messages reçus -->
+<div id="received-messages">
+    <h2>Messages reçus :</h2>
+    <ul id="messages-list"></ul>
+</div>
+
 <script>
     // Jeton JWT pour autorisation
-    const token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXZEEtY2IxcFhwSkdTZFo2ck5CNWJla1ljWm9YbG1OYXZKRlI0TWtHNk04In0.eyJleHAiOjE3MzUwNDgxNjEsImlhdCI6MTczNTAzMDE2MSwianRpIjoiN2Q1ODUxMjgtOWYyYi00Yjc1LWFjZmItOGRlY2Q3M2Q4MDFlIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDk5L3JlYWxtcy9jb25uZWN0VHJvYyIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiJjNDc5MzExNS0yOWNjLTRjMjctOTQ3Zi1jMTBmYTQ2ZDhhOTAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJjb25uZWN0Iiwic2lkIjoiNzVkMWUxOTktMzI0My00Mjc3LWIxYmEtZTA2Zjc3MzIxZjdmIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtY29ubmVjdHRyb2MiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX0sImNvbm5lY3QiOnsicm9sZXMiOlsiVVNFUiJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInBob25lTnVtYmVyIjoiMTIzNDU2Nzg5MCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibnVtYmVyT2ZWaWV3cyI6MCwibmFtZSI6ImRhdmlkIGRhdmlkIiwicmF0aW5nIjoiMC4wIiwicHJlZmVycmVkX3VzZXJuYW1lIjoiZGF2aWRAdGVzdC5jb20iLCJnaXZlbl9uYW1lIjoiZGF2aWQiLCJmYW1pbHlfbmFtZSI6ImRhdmlkIiwiZW1haWwiOiJkYXZpZEB0ZXN0LmNvbSJ9.oVkQ0-5MR0xvNrxY-l9OI0B0cEkyYfCEJNyX2XqGtabWERdENfjqxxD66_r-FL1T40Iyz0bMPZEB_KBrszUbBCpGEA1Zcj2nlcsTWO9dsY_d4y_BcPxrJACgwKZk8Ii4yLGCvBOK-ACyXNvI1bA3kqEQQEl-m1j5-nSCuzWG2-N1so_P2hvqBU2yKO6VLkiuiaZmmmMXu_KmqvJnkz-aUq1RTRh60FnJVu27lzaTPWcNd4vWUwo_yy9ph66U5Dp-sGzqVfZRrZMQnkge4Dm9KBFjL8M4hASHD8rsx8bXUgt5AYBvBvaUU_bXxAHDfEDZ35cH2qE0kCAa1fADsggB_g";
+    const token = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJXZEEtY2IxcFhwSkdTZFo2ck5CNWJla1ljWm9YbG1OYXZKRlI0TWtHNk04In0.eyJleHAiOjE3MzUxMzc3NjgsImlhdCI6MTczNTExOTc2OCwianRpIjoiZGU0MWM0NzgtOGY0My00MDZiLTk5ZjgtZTM5MGRkMzgzYzVhIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo5MDk5L3JlYWxtcy9jb25uZWN0VHJvYyIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiIzZmFkYjJkYS1kNWQ1LTRmMWQtYmMwOS0yNzYxODYyYjljNDUiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJjb25uZWN0Iiwic2lkIjoiN2M2NzMzZTQtYjEwMi00YjBiLTkwOTgtZTViYzBiMTVkZmIyIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtY29ubmVjdHRyb2MiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX0sImNvbm5lY3QiOnsicm9sZXMiOlsiVVNFUiJdfX0sInNjb3BlIjoiZW1haWwgcHJvZmlsZSIsInBob25lTnVtYmVyIjoiMTIzNDU2Nzg5MCIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwibnVtYmVyT2ZWaWV3cyI6MCwibmFtZSI6IlRlc3QgVGVzdCIsInJhdGluZyI6IjAuMCIsInByZWZlcnJlZF91c2VybmFtZSI6InRlc3RAdGVzdC5jb20iLCJnaXZlbl9uYW1lIjoiVGVzdCIsImZhbWlseV9uYW1lIjoiVGVzdCIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSJ9.ZpJP0_edaRXyIkMaek3XW3Q41aDfDO3YHmG7pYXj7YgOj7AUql1q2u1zEzQ-8GA1X3Zt520DNBk_7tmKzky_2kPOD40uxVOVNGF-g5zM_Niz9-p9miIkNsTOTdCCU7WFPjFpUT2u6VV9EAAatLaHkZ-_0krmH8kpG6eK2ZCjQqwpCyu-uVkOmn2F9Ww1gqocQZMSDPN8eHvu6YHCPx4Kf5OuKDfVCDixvSJ36npTN4IpNGBEhG-VurpPczEbnFVsc0yRc2ljA-Uk2M6kBj6Qm1FBv6Fk5qQn71Bf70SngMSXGUbsRftD0LhHfDXWb_59w6eAIyZLeXxNSPoXlqbg3Q";
 
-    // URL relative pour le WebSocket (correction)
+    // URL relative pour le WebSocket
     const stompClientUrl = '/auth/ws';
     const apiUrl = 'http://localhost:6801/api/listings'; // URL API pour récupérer les listings
 
@@ -45,9 +51,8 @@
 
     function displayListings(listings) {
         const listingsContainer = document.getElementById('listings');
-        listingsContainer.innerHTML = ''; // Réinitialiser le conteneur
+        listingsContainer.innerHTML = '';
 
-        // Afficher chaque listing dans le conteneur
         listings.forEach(listing => {
             const listingDiv = document.createElement('div');
             listingDiv.innerHTML = `
@@ -62,36 +67,67 @@
     function contactSeller(userId) {
         console.log('Contacting seller with ID:', userId);
 
-        // Connexion avec SockJS et STOMP
         const socket = new SockJS(stompClientUrl);
         stompClient = Stomp.over(socket);
 
         stompClient.connect(
-            { Authorization: 'Bearer ' + token }, // Transmettre le token ici pour la connexion
+            { Authorization: 'Bearer ' + token },
             () => {
                 console.log('STOMP connection established');
 
-                // Abonnement au topic
-                stompClient.subscribe(`/topic/messages/${userId}`, message => {
-                    console.log('Message reçu :', JSON.parse(message.body));
+                // Subscribe to receive responses
+                stompClient.subscribe(`/topic/messages/${userId}`, (message) => {
+                    const receivedMessage = JSON.parse(message.body);
+                    displayReceivedMessage(receivedMessage, userId);
                 });
 
-                // Envoi d'un message (inclure le token dans les en-têtes)
+                // Send a default greeting message
                 const chatMessage = {
                     content: `Bonjour, je suis intéressé par votre annonce.`,
                     recipientId: userId,
-                    listingId: '16c6faa0-8adb-4c2c-abe1-15a869407d9f',
                 };
 
                 stompClient.send(`/app/chat/${userId}`, { Authorization: 'Bearer ' + token }, JSON.stringify(chatMessage));
             },
-            error => {
+            (error) => {
                 console.error('Erreur lors de la connexion STOMP :', error);
             }
         );
     }
 
-    // Récupérer les listings au chargement
+    function displayReceivedMessage(message, userId) {
+        const messagesList = document.getElementById('messages-list');
+        const messageItem = document.createElement('li');
+
+        // Ajouter le contenu du message et un champ pour répondre
+        messageItem.innerHTML = `
+            <strong>De :</strong> ${message.senderName} <br>
+            <strong>Message :</strong> ${message.content} <br>
+            <em>Reçu à : ${new Date(parseInt(message.tstamp || Date.now())).toLocaleString()}</em>
+            <br>
+            <textarea id="reply-${userId}" placeholder="Répondre..."></textarea>
+            <button onclick="sendReply('${userId}', document.getElementById('reply-${userId}').value)">Envoyer</button>
+        `;
+
+        messagesList.appendChild(messageItem);
+    }
+
+    function sendReply(userId, content) {
+        if (!content.trim()) {
+            alert('Le message ne peut pas être vide.');
+            return;
+        }
+
+        const replyMessage = {
+            content,
+            recipientId: userId,
+        };
+
+        stompClient.send(`/app/chat/${userId}`, { Authorization: 'Bearer ' + token }, JSON.stringify(replyMessage));
+        alert('Message envoyé avec succès.');
+    }
+
+    // Charger les annonces au démarrage
     getListings();
 </script>
 

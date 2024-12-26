@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,16 +54,33 @@ public class ListingImageServiceImpl implements ListingImageService {
 
     }
 
+//    @Override
+//    public ListingImage uplaodImageListing(MultipartFile file, String listingId) throws IOException {
+//
+//        Listing listing = listingRepository.findById(listingId).
+//                orElseThrow(() -> new IllegalArgumentException("Listing not found"));
+//        return listingImageRepository.save(ListingImage.builder().name(file.getOriginalFilename()).type(file.getContentType())
+//                .image(file.getBytes()).listing(listing).build());
+//
+//    }
+
     @Override
-    public ListingImage uplaodImageListing(MultipartFile file, String listingId) throws IOException {
+    public List<ListingImage> uploadImageListing(List<MultipartFile> files, String listingId) throws IOException {
+        Listing listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new IllegalArgumentException("Listing not found"));
 
-        Listing listing = listingRepository.findById(listingId).
-                orElseThrow(() -> new IllegalArgumentException("Listing not found"));
-        return listingImageRepository.save(ListingImage.builder().name(file.getOriginalFilename()).type(file.getContentType())
-                .image(file.getBytes()).listing(listing).build());
-
+        List<ListingImage> listingImages = new ArrayList<>();
+        for (MultipartFile file : files) {
+            ListingImage listingImage = ListingImage.builder()
+                    .name(file.getOriginalFilename())
+                    .type(file.getContentType())
+                    .image(file.getBytes())
+                    .listing(listing)
+                    .build();
+            listingImages.add(listingImageRepository.save(listingImage));
+        }
+        return listingImages;
     }
-
     @Override
     public List<ListingImage> getImagesParListing(String listingId) {
         return listingImageRepository.findAll().stream().filter(image -> image.getListing().getListingId().equals(listingId)).collect(Collectors.toList());
